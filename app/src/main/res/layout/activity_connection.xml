@@ -3,20 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="horizontal">
 
     <TextView
         android:id="@+id/text_connection_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/text_product_info"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="137dp"
         android:gravity="center"
         android:text="Status: No Product Connected"
         android:textColor="@android:color/black"
         android:textSize="20dp"
-        android:textStyle="bold"
-        android:layout_alignBottom="@+id/text_product_info"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="89dp" />
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/text_product_info"
@@ -27,21 +27,18 @@
         android:text="@string/product_information"
         android:textColor="@android:color/black"
         android:textSize="20dp"
-        android:gravity="center"
-        android:textStyle="bold"
-        />
+        android:textStyle="bold" />
 
     <Button
         android:id="@+id/btn_open"
         android:layout_width="150dp"
         android:layout_height="55dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="350dp"
+        android:layout_marginTop="310dp"
         android:background="@drawable/round_btn"
         android:text="Open"
         android:textColor="@color/colorWhite"
-        android:textSize="20dp"
-        />
+        android:textSize="20dp" />
 
     <TextView
         android:layout_width="wrap_content"
