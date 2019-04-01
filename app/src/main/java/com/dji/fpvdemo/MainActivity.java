@@ -8,11 +8,13 @@ import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
 import android.os.Handler;
+import android.support.annotation.ColorInt;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
@@ -44,6 +47,9 @@ import dji.sdk.media.FetchMediaTaskContent;
 import dji.sdk.media.FetchMediaTaskScheduler;
 import dji.sdk.media.MediaFile;
 import dji.sdk.media.MediaManager;
+import dji.thirdparty.v3.eventbus.util.AsyncExecutor;
+
+import static java.lang.Thread.sleep;
 
 public class MainActivity extends Activity implements TextureView.SurfaceTextureListener, View.OnClickListener {
 
@@ -57,7 +63,9 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     protected VideoFeeder.VideoDataListener mReceivedVideoDataListener = null;
     private Handler handler;
     private  TextView sheep_count;
+    //private ImageView test;
    // private ImageView img_test;
+    private Bitmap image;
 
     private List<MediaFile> mediaFileList = new ArrayList<MediaFile>();
     private MediaManager mMediaManager;
@@ -88,7 +96,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                                 }
                             });
                             if (mediaFileList.isEmpty()){
-                                showToast("My name jeff. File list is empty.");
+                                showToast("File list is empty.");
                             }
                             else{
                                 showToast(mediaFileList.get(0).getFileName());
@@ -99,12 +107,15 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
             }
         }
+
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+
         initUI();
         handler = new Handler();
 
@@ -198,7 +209,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         recordingTime = (TextView) findViewById(R.id.timer);
         mCaptureBtn = (Button) findViewById(R.id.btn_capture);
         //img_test = (ImageView) findViewById(R.id.img_test);
-
+       // test = (ImageView) findViewById(R.id.test);
 
 
         if (null != mVideoSurface) {
@@ -226,7 +237,6 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
     // Method for taking photo
     private void captureAction(){
-
         final Camera camera = FPVDemoApplication.getCameraInstance();
         if (camera != null) {
 
@@ -254,38 +264,96 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 }
             });
         }
+
         getFileList();
-        ImageProcess();
+        try {
+            mediaFileList.get(0).fetchPreview(new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    if (djiError != null) {
+                        showToast(djiError.toString());
+                    }
+                }
+            });
+        }catch(Exception e){
+            showToast(e.toString());
+        }
+
+            ImageProcess();
+
     }
 
-    private void ImageProcess(){
-        Bitmap image = mediaFileList.get(0).getPreview();
-
-
+    private void ImageProcess() {
+        try{
+        image = mediaFileList.get(0).getPreview();
+    }catch(Exception e){
+        showToast(e.toString());
     }
-
-    private void initPreviewer() {
-
-        BaseProduct product = FPVDemoApplication.getProductInstance();
-
-        if (product == null || !product.isConnected()) {
-            showToast(getString(R.string.disconnected));
-        } else {
-            if (null != mVideoSurface) {
-                mVideoSurface.setSurfaceTextureListener(this);
-            }
-            if (!product.getModel().equals(Model.UNKNOWN_AIRCRAFT)) {
-                VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(mReceivedVideoDataListener);
+     /*   try {
+            Thread.sleep(5000);
+        }catch(InterruptedException e){
+            showToast("Error Occured " + e.toString());
+        }
+        */
+try{
+        showToast("Jeff: " + image.getHeight());
+    }catch(Exception e){
+        showToast(e.toString());
+    }
+        /*
+        int[] pixelColor = new int[image.getHeight() * image.getWidth()];
+        int i = 0;
+        for (int x = 0; x< image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                pixelColor[i] = image.getPixel(x, y);
+                i++;
             }
         }
-    }
-
-    private void uninitPreviewer() {
-        Camera camera = FPVDemoApplication.getCameraInstance();
-        if (camera != null){
-            // Reset the callback
-            VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(null);
+        int threshold = autoCalcThreshold(pixelColor); //1.)600 2.) 450 3.) bad image 4.) 450 5.) 450
+        i = 0;
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                if(pixelColor[i] < threshold) {
+                    image.setPixel(x, y, 0);
+                }else {
+                    image.setPixel(x, y, 16777215);
+                }
+                i++;
+            }
         }
+        */
     }
+/*
+    public static int autoCalcThreshold(int[] colours) {
+        int threshold = 0;
+        for(int c : colours) {
+            threshold += c;
+        }
+        return (threshold / (colours.length) + 300);
+    }
+*/
 
+        private void initPreviewer () {
+
+            BaseProduct product = FPVDemoApplication.getProductInstance();
+
+            if (product == null || !product.isConnected()) {
+                showToast(getString(R.string.disconnected));
+            } else {
+                if (null != mVideoSurface) {
+                    mVideoSurface.setSurfaceTextureListener(this);
+                }
+                if (!product.getModel().equals(Model.UNKNOWN_AIRCRAFT)) {
+                    VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(mReceivedVideoDataListener);
+                }
+            }
+        }
+
+        private void uninitPreviewer () {
+            Camera camera = FPVDemoApplication.getCameraInstance();
+            if (camera != null) {
+                // Reset the callback
+                VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(null);
+            }
+        }
 }

@@ -5,12 +5,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Change width back to match_parent if crashes -->
+    <!-- Change width back to match_parent if crashes (center gravity too)-->
     <TextureView
         android:id="@+id/video_previewer_surface"
         android:layout_width="1920px"
         android:layout_height="1080px"
-        android:layout_gravity="center"
+        android:layout_gravity="left" />
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/linearLayout" />
 
@@ -32,11 +32,15 @@
 
         <TextView
             android:id="@+id/sheep_count"
-            android:layout_width="match_parent"
+            android:layout_width="518dp"
             android:layout_height="match_parent"
-            android:text="Sheep Count:"
-            android:textSize="@dimen/offline_map_dp_20_in_sw320dp"/>
+            android:text="Animals Detected:"
+            android:textSize="@dimen/offline_map_dp_20_in_sw320dp" />
 
+        <ImageView
+            android:id="@+id/test"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
 
 
